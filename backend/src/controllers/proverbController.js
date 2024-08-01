@@ -31,12 +31,13 @@ exports.getRandomProverb = async (req, res) => {
     const query = language ? { language } : {};
 
     const count = await Proverb.countDocuments(query);
+    if (count === 0) {
+      return res.status(404).json({ message: 'No proverbs found' });
+    }
+    
     const random = Math.floor(Math.random() * count);
     const proverb = await Proverb.findOne(query).skip(random);
 
-    if (!proverb) {
-      return res.status(404).json({ message: 'No proverb found' });
-    }
     res.json(proverb);
   } catch (error) {
     res.status(500).json({ message: error.message });
