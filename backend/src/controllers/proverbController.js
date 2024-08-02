@@ -1,5 +1,63 @@
 const Proverb = require('../models/Proverb');
 
+exports.getProverbs = async (req, res) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const language = req.query.language;
+
+    const query = language ? { language } : {};
+
+    const proverbs = await Proverb.find(query)
+      .skip((page - 1) * limit)
+      .limit(limit);
+
+    const total = await Proverb.countDocuments(query);
+
+    res.json({
+      proverbs,
+      currentPage: page,
+      totalPages: Math.ceil(total / limit),
+      totalProverbs: total
+    });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.getRandomProverb = async (req, res) => {
+  try {
+    const language = req.query.language;
+    const query = language ? { language } : {};
+
+    const count = await Proverb.countDocuments(query);
+    const random = Math.floor(Math.random() * count);
+    const proverb = await Proverb.findOne(query).skip(random);
+
+    if (!proverb) {
+      return res.status(404).json({ message: 'No proverb found' });
+    }
+    res.json(proverb);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+exports.searchProverbs = async (req, res) => {
+  try {
+    const { q, language } = req.query;
+    const query = {
+      $text: { $search: q },
+      ...(language && { language })
+    };
+
+    const proverbs = await Proverb.find(query);
+    res.json(proverbs);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 exports.createProverb = async (req, res) => {
   try {
     const proverb = new Proverb(req.body);

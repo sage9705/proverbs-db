@@ -15,15 +15,11 @@ const ProverbSchema = new mongoose.Schema({
     type: String,
     required: false,
   },
-  tags: [{
-    type: String,
-    trim: true,
-  }],
 }, {
   timestamps: true,
 });
 
-ProverbSchema.index({ text: 'text', tags: 'text' });
+ProverbSchema.index({ text: 'text' });
 
 const Proverb = mongoose.model('Proverb', ProverbSchema);
 
