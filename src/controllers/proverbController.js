@@ -2,7 +2,7 @@ const Proverb = require("../models/Proverb");
 const { validateProverb } = require("../utils/validation");
 const createPaginationResponse = require("../utils/pagination");
 
-exports.getProverbs = async (req, res) => {
+exports.getProverbs = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
@@ -27,11 +27,11 @@ exports.getProverbs = async (req, res) => {
 
     res.json(response);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.getRandomProverb = async (req, res) => {
+exports.getRandomProverb = async (req, res, next) => {
   try {
     const language = req.query.language;
     const query = language ? { language } : {};
@@ -46,11 +46,11 @@ exports.getRandomProverb = async (req, res) => {
 
     res.json(proverb);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.searchProverbs = async (req, res) => {
+exports.searchProverbs = async (req, res, next) => {
   try {
     const { q, language } = req.query;
     const query = {
@@ -61,25 +61,26 @@ exports.searchProverbs = async (req, res) => {
     const proverbs = await Proverb.find(query);
     res.json(proverbs);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.createProverb = async (req, res) => {
+exports.createProverb = async (req, res, next) => {
   try {
     const { error } = validateProverb(req.body);
-    if (error)
+    if (error) {
       return res.status(400).json({ message: error.details[0].message });
+    }
 
     const proverb = new Proverb(req.body);
     await proverb.save();
     res.status(201).json(proverb);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.getProverbById = async (req, res) => {
+exports.getProverbById = async (req, res, next) => {
   try {
     const proverb = await Proverb.findById(req.params.id);
     if (!proverb) {
@@ -87,15 +88,16 @@ exports.getProverbById = async (req, res) => {
     }
     res.json(proverb);
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.updateProverb = async (req, res) => {
+exports.updateProverb = async (req, res, next) => {
   try {
     const { error } = validateProverb(req.body);
-    if (error)
+    if (error) {
       return res.status(400).json({ message: error.details[0].message });
+    }
 
     const proverb = await Proverb.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
@@ -105,11 +107,11 @@ exports.updateProverb = async (req, res) => {
     }
     res.json(proverb);
   } catch (error) {
-    res.status(400).json({ message: error.message });
+    next(error);
   }
 };
 
-exports.deleteProverb = async (req, res) => {
+exports.deleteProverb = async (req, res, next) => {
   try {
     const proverb = await Proverb.findByIdAndDelete(req.params.id);
     if (!proverb) {
@@ -117,6 +119,6 @@ exports.deleteProverb = async (req, res) => {
     }
     res.json({ message: "Proverb deleted successfully" });
   } catch (error) {
-    res.status(500).json({ message: error.message });
+    next(error);
   }
 };
