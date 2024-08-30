@@ -1,4 +1,6 @@
 const Proverb = require("../models/Proverb");
+const { validateProverb } = require("../utils/validation");
+const createPaginationResponse = require("../utils/pagination");
 
 exports.getProverbs = async (req, res) => {
   try {
@@ -14,12 +16,16 @@ exports.getProverbs = async (req, res) => {
 
     const total = await Proverb.countDocuments(query);
 
-    res.json({
+    const baseUrl = `${req.protocol}://${req.get("host")}${req.baseUrl}`;
+    const response = createPaginationResponse(
       proverbs,
-      currentPage: page,
-      totalPages: Math.ceil(total / limit),
-      totalProverbs: total,
-    });
+      page,
+      limit,
+      total,
+      baseUrl
+    );
+
+    res.json(response);
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
@@ -61,20 +67,15 @@ exports.searchProverbs = async (req, res) => {
 
 exports.createProverb = async (req, res) => {
   try {
+    const { error } = validateProverb(req.body);
+    if (error)
+      return res.status(400).json({ message: error.details[0].message });
+
     const proverb = new Proverb(req.body);
     await proverb.save();
     res.status(201).json(proverb);
   } catch (error) {
     res.status(400).json({ message: error.message });
-  }
-};
-
-exports.getProverbs = async (req, res) => {
-  try {
-    const proverbs = await Proverb.find();
-    res.json(proverbs);
-  } catch (error) {
-    res.status(500).json({ message: error.message });
   }
 };
 
@@ -92,6 +93,10 @@ exports.getProverbById = async (req, res) => {
 
 exports.updateProverb = async (req, res) => {
   try {
+    const { error } = validateProverb(req.body);
+    if (error)
+      return res.status(400).json({ message: error.details[0].message });
+
     const proverb = await Proverb.findByIdAndUpdate(req.params.id, req.body, {
       new: true,
     });
