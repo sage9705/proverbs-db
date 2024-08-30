@@ -60,3 +60,6 @@ __pycache__/
 
 # Google cookie file
 .google-cookie
+
+combined.log
+error.log

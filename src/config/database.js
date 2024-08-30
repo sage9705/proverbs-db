@@ -7,14 +7,12 @@ const connectDB = async () => {
     const conn = await mongoose.connect(config.MONGODB_URI, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
-      useCreateIndex: true,
-      useFindAndModify: false,
     });
 
     logger.info(`MongoDB Connected: ${conn.connection.host}`);
   } catch (error) {
     logger.error(`Error: ${error.message}`);
-    process.exit(1);
+    throw error; // Rethrow the error so it can be caught in server.js
   }
 };
 

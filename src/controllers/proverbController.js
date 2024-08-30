@@ -1,20 +1,11 @@
 const Proverb = require("../models/Proverb");
 const createPaginationResponse = require("../utils/pagination");
-const cache = require("../utils/cache");
 const logger = require("../utils/logger");
-const config = require("../config/config");
 
 exports.getProverbs = async (req, res, next) => {
   try {
     const { page = 1, limit = 10, language } = req.query;
     const query = language ? { language } : {};
-
-    const cacheKey = `proverbs_${page}_${limit}_${language || "all"}`;
-    const cachedResult = await cache.get(cacheKey);
-
-    if (cachedResult) {
-      return res.json(JSON.parse(cachedResult));
-    }
 
     const proverbs = await Proverb.find(query)
       .skip((page - 1) * limit)
@@ -30,8 +21,6 @@ exports.getProverbs = async (req, res, next) => {
       total,
       baseUrl
     );
-
-    await cache.set(cacheKey, JSON.stringify(response), config.CACHE_TTL);
 
     res.json(response);
   } catch (error) {
