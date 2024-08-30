@@ -1,4 +1,4 @@
-const Proverb = require('../models/Proverb');
+const Proverb = require("../models/Proverb");
 
 exports.getProverbs = async (req, res) => {
   try {
@@ -18,7 +18,7 @@ exports.getProverbs = async (req, res) => {
       proverbs,
       currentPage: page,
       totalPages: Math.ceil(total / limit),
-      totalProverbs: total
+      totalProverbs: total,
     });
   } catch (error) {
     res.status(500).json({ message: error.message });
@@ -32,9 +32,9 @@ exports.getRandomProverb = async (req, res) => {
 
     const count = await Proverb.countDocuments(query);
     if (count === 0) {
-      return res.status(404).json({ message: 'No proverbs found' });
+      return res.status(404).json({ message: "No proverbs found" });
     }
-    
+
     const random = Math.floor(Math.random() * count);
     const proverb = await Proverb.findOne(query).skip(random);
 
@@ -49,7 +49,7 @@ exports.searchProverbs = async (req, res) => {
     const { q, language } = req.query;
     const query = {
       $text: { $search: q },
-      ...(language && { language })
+      ...(language && { language }),
     };
 
     const proverbs = await Proverb.find(query);
@@ -82,7 +82,7 @@ exports.getProverbById = async (req, res) => {
   try {
     const proverb = await Proverb.findById(req.params.id);
     if (!proverb) {
-      return res.status(404).json({ message: 'Proverb not found' });
+      return res.status(404).json({ message: "Proverb not found" });
     }
     res.json(proverb);
   } catch (error) {
@@ -92,9 +92,11 @@ exports.getProverbById = async (req, res) => {
 
 exports.updateProverb = async (req, res) => {
   try {
-    const proverb = await Proverb.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    const proverb = await Proverb.findByIdAndUpdate(req.params.id, req.body, {
+      new: true,
+    });
     if (!proverb) {
-      return res.status(404).json({ message: 'Proverb not found' });
+      return res.status(404).json({ message: "Proverb not found" });
     }
     res.json(proverb);
   } catch (error) {
@@ -106,9 +108,9 @@ exports.deleteProverb = async (req, res) => {
   try {
     const proverb = await Proverb.findByIdAndDelete(req.params.id);
     if (!proverb) {
-      return res.status(404).json({ message: 'Proverb not found' });
+      return res.status(404).json({ message: "Proverb not found" });
     }
-    res.json({ message: 'Proverb deleted successfully' });
+    res.json({ message: "Proverb deleted successfully" });
   } catch (error) {
     res.status(500).json({ message: error.message });
   }
