@@ -14,11 +14,17 @@ exports.getProverbs = async (req, res, next) => {
     const total = await Proverb.countDocuments(query);
 
     const baseUrl = `${req.protocol}://${req.get("host")}${req.baseUrl}`;
+    const paginationOptions = {
+      maxPages: 5,
+      query: language ? { language } : {},
+    };
+
     const response = createPaginationResponse(
       proverbs,
-      page,
-      limit,
+      parseInt(page),
+      parseInt(limit),
       total,
+      paginationOptions,
       baseUrl
     );
 
